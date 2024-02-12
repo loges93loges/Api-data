@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        /* Add your custom styles here */
-        body {
-            padding: 20px;
-            background-color: rgb(0, 0, 44);
-            color: white;
-        }
-        #dynamic-button {
+    <title>API Data Viewer</title>
+</head>
+<body>
+ 
+  <style> 
+  body{
+    background-color:rgb(180, 180, 180)
+  }
+       .dynamic-button {
       padding: 10px 20px;
       width: 200px;
       height: 50px;
       background-color: rgb(123, 120, 120);
-      color: #ffffff;
+      color: #000000;
     border: 2px solid;
     margin: 0%;
       border-radius: 5px;
       cursor: pointer;
       position: relative;
-          overflow: hidden;
+      overflow: hidden;
       z-index: 1;
       transition: color 0.3s ease, transform 0.3s ease;
       --borderWidth: 3px;
@@ -45,7 +45,9 @@
 		background-position: 0% 50%;
 	}
 }
-        #dynamic-button::before {
+
+    /* Skew effect on hover */
+    .dynamic-button::before {
       content: '';
       position: absolute;
       top: 0;
@@ -59,94 +61,65 @@
       transform: skewX(50px);
     }
 
-    #dynamic-button:hover::before {
+    .dynamic-button:hover::before {
         z-index: -1;
         transform: skewX(50px);
       left: -30px;
     }
 
     /* Click effect */
-    #dynamic-button:active {
+    .dynamic-button:active {
       transform: scale(0.90);
-
     }
-        .data-container {
-            margin-top: 20px;
-        }
-    </style>
-    <title>GitHub User Details</title>
-</head>
-<body>
+  </style>
+    <h1>API Data Viewer</h1>
 
-    <div class="container">
-        <h1>GitHub User Details</h1>
+    <button onclick="fetchUserData()" class="dynamic-button">Fetch User Data</button>
 
-        <form id="github-form">
-            <div class="form-group">
-                <label for="github-username">GitHub Username:</label>
-                <input type="text" class="form-control" id="github-username" placeholder="Enter GitHub username" required>
-            </div>
-            <button id="dynamic-button" type="submit" class="btn btn-primary">Get Details</button>
-        </form>
-
-        <div class="data-container" id="github-data">
-            <!-- User details and repositories will be displayed here -->
-        </div>
-    </div>
+    <div id="userDataContainer"></div>
 
     <script>
-        document.getElementById('github-form').addEventListener('submit', function (event) {
-            event.preventDefault();
+        function fetchUserData() {
+            var apiUrl = 'https://jsonplaceholder.typicode.com/users';
 
-            // Get the input value
-            const username = document.getElementById('github-username').value;
-
-            // Fetch data from GitHub (User) API based on the provided username
-            fetchData(`https://api.github.com/users/${username}`)
-                .then(userData => {
-                    const githubUserData = document.getElementById('github-data');
-                    githubUserData.innerHTML = `
-                        <p><strong>Name:</strong> ${userData.name}</p>
-                        <p><strong>Location:</strong> ${userData.location}</p>
-                        <p><strong>Public Repositories:</strong> ${userData.public_repos}</p>
-                        <p><strong>Followers:</strong> ${userData.followers}</p>
-                    `;
-
-                    // Fetch user's repositories
-                    return fetchData(`https://api.github.com/users/${username}/repos`);
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
                 })
-                .then(reposData => {
-                    const githubUserData = document.getElementById('github-data');
-                    githubUserData.innerHTML += `
-                        <div class="data-container">
-                            <h2>Repositories</h2>
-                            <ul>
-                                ${reposData.map(repo => `<li>${repo.name}</li>`).join('')}
-                            </ul>
-                        </div>
-                    `;
+                .then(userData => {
+                    displayUserData(userData);
                 })
                 .catch(error => {
-                    const githubUserData = document.getElementById('github-data');
-                    githubUserData.innerHTML = `<p class="text-danger">Error fetching GitHub user data: ${error.message}</p>`;
+                    console.error('Error fetching user data:', error);
+                    var userDataContainer = document.getElementById('userDataContainer');
+                    userDataContainer.innerHTML = `<p>Error fetching user data: ${error.message}</p>`;
                 });
-        });
+        }
 
-        // Function to fetch data from an API using Promises
-        function fetchData(url) {
-            return new Promise((resolve, reject) => {
-                fetch(url)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`PLEASE ENTER VALID USERNAME: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => resolve(data))
-                    .catch(error => reject(error));
+        function displayUserData(userData) {
+            var userDataContainer = document.getElementById('userDataContainer');
+            userDataContainer.innerHTML = '';
+
+            if (userData.length === 0) {
+                userDataContainer.innerHTML = '<p>No user data available</p>';
+                return;
+            }
+
+            var userList = document.createElement('ul');
+
+            userData.forEach(user => {
+                var userItem = document.createElement('li');
+                userItem.innerHTML = `<div><strong>Name:</strong> ${user.name}<br><strong>Email:</strong> ${user.email}<br><strong>Phone:</strong> ${user.phone}<br>
+                <strong>city:</strong> ${user.address.street}, ${user.address.city}, ${user.address.suite}, ${user.address.zipcode}<br>
+                    <strong>Website:</strong>${user.website}<br><strong></div><br>`;
+                userList.appendChild(userItem);
             });
+
+            userDataContainer.appendChild(userList);
         }
     </script>
-
 </body>
 </html>
