@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Data Viewer</title>
+</head>
+<body>
+    <style>
+        .box{
+            width: 250px;
+            
+            height: 150px;
+            margin-bottom: 20px;
+            padding-left: 40px;
+            padding-top: 40px;
+            background-color: rgb(102, 158, 139);
+        }
+        ul{
+            list-style-type: none;
+            background-color: rgb(58, 112, 112);
+            padding: 20px;
+        }
+        .dynamic-button {
+      padding: 10px 20px;
+      width: 200px;
+      height: 50px;
+      background-color: rgb(123, 120, 120);
+      color: #000000;
+    border: 2px solid;
+    margin: 0%;
+      border-radius: 5px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      transition: color 0.3s ease, transform 0.3s ease;
+      --borderWidth: 3px;
+  background: transparent;
+  position: relative;
+  border-radius: 5px;
+  border-color: grey;
+    }
+
+
+
+@keyframes animatedgradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+    /* Skew effect on hover */
+    .dynamic-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -320%;
+      width: 260px;
+      height: 100%;
+      background: rgb(0, 255, 221);/* Change gradient colors as needed */
+      transform: skewX(45deg);
+      transition: left 1.5s ease;
+      z-index: -1;
+      transform: skewX(50px);
+    }
+
+    .dynamic-button:hover::before {
+        z-index: -1;
+        transform: skewX(50px);
+      left: -30px;
+    }
+
+    /* Click effect */
+    .dynamic-button:active {
+      transform: scale(0.90);
+    }
+    </style>
+    <h1>Dog Data Viewer</h1>
+
+    <button class = "dynamic-button" onclick="fetchDogData()">Fetch Dog Data</button>
+
+    <div id="dogDataContainer"></div>
+
+    <script>
+        function fetchDogData() {
+            var apiUrl = 'https://api.thedogapi.com/v1/breeds';
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(dogData => {
+                    displayDogData(dogData);
+                })
+                .catch(error => {
+                    console.error('Error fetching dog data:', error);
+                    var dogDataContainer = document.getElementById('dogDataContainer');
+                    dogDataContainer.innerHTML = `<p>Error fetching dog data: ${error.message}</p>`;
+                });
+        }
+
+        function displayDogData(dogData) {
+            var dogDataContainer = document.getElementById('dogDataContainer');
+            dogDataContainer.innerHTML = '';
+
+            if (dogData.length === 0) {
+                dogDataContainer.innerHTML = '<p>No dog data available</p>';
+                return;
+            }
+
+            var dogList = document.createElement('div');
+
+            dogData.forEach(dog => {
+                var dogItem = document.createElement('ul');
+                dogItem.innerHTML = `<strong>Name:</strong> ${dog.name}<br><strong>Life Span:</strong> ${dog.life_span}<br>
+                <strong>Bred:</strong> ${dog.bred_for}<br><strong>Origin:</strong> ${dog.origin}<br>
+                <strong>Weight:</strong> ${dog.weight.imperial}, ${dog.weight.metric}<br>
+                <strong>Height:</strong> ${dog.height.imperial}, ${dog.height.metric}</div>`;
+;
+                dogList.appendChild(dogItem);
+            });
+
+            dogDataContainer.appendChild(dogList);
+        }
+    </script>
+</body>
+</html>
